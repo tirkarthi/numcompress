@@ -67,6 +67,7 @@
 (defn decompress
   "Returns a collection of numbers for the given string"
   [text]
+  {:pre [(validate-spec ::text text)]}
   (let [index      0
         last-num   0
         precision  (- (int (get text index)) 63)
