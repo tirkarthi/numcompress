@@ -1,4 +1,4 @@
-# numcompress
+# numcompress [![Build Status](https://travis-ci.org/tirkarthi/numcompress.svg?branch=master)](https://travis-ci.org/tirkarthi/numcompress)
 
 A clojure port of [numcompress](https://github.com/amit1rrr/numcompress) Python library
 
