@@ -1,4 +1,14 @@
-(ns numcompress.core)
+(ns numcompress.core
+  (:require [clojure.spec.alpha :as spec]
+            [numcompress.utils :refer [validate-spec]]))
+
+
+(spec/def ::series (spec/coll-of number?))
+(spec/def ::precision (spec/and number? nat-int? #(<= %1 10)))
+(spec/def ::text (spec/and string?
+                           #(let [precision (- (int (get %1 0)) 63)]
+                              (spec/valid? ::precision precision))))
+
 
 (defn- calculate-diff
   [result last-num num precision]
@@ -19,19 +29,29 @@
 
 
 (defn compress
-  [{:keys [series precision] :or {precision 3}}]
-  (let [result (char (+ 63 precision))
-        inputs (partition 2 1 (concat [0] series))]
-    (reduce (fn [result [last-num num]]
-              (calculate-diff result last-num num precision))
-            result inputs)))
+  "Returns a string for the given series of numbers and precision"
+  ([series] (compress series 3))
+  ([series precision]
+   {:pre [(validate-spec ::series series)
+          (validate-spec ::precision precision)]}
+   (let [result (char (+ 63 precision))
+         inputs (partition 2 1 (concat [0] series))]
+     (reduce (fn [result [last-num num]]
+               (calculate-diff result last-num num precision))
+             result inputs))))
 
-(defn decompress-number
+
+(spec/fdef compress
+           :args (spec/and (spec/cat :series ::series :precision ::precision))
+           :ret string?)
+
+
+(defn- decompress-number
   [text index]
   (loop [result (biginteger 1)
-         shift 0
-         index index
-         b (biginteger (- (int (get text index)) 64))]
+         shift  0
+         index  index
+         b      (biginteger (- (int (get text index)) 64))]
     (if (< b 0x1f)
       [[(inc index)
         (let [result (biginteger (+ result (.shiftLeft (biginteger b) shift)))]
@@ -43,23 +63,30 @@
              (inc index)
              (-' (int (get text (inc index))) (biginteger 64))))))
 
+
 (defn decompress
-  [{:keys [text]}]
-  (let [index          0
-        last-num       0
-        precision      (- (int (get text index)) 63)
-        length         (count text)
-        results        (loop [res (decompress-number text (inc index))
-                              last-num last-num
-                              result []]
-                         (if (>= (ffirst res) length)
-                           (conj result (+ last-num (second (first res))))
-                           (recur (decompress-number text (ffirst res))
-                                  (+ last-num (second (first res)))
-                                  (conj result (+ last-num (second (first res)))))))]
+  "Returns a collection of numbers for the given string"
+  [text]
+  (let [index      0
+        last-num   0
+        precision  (- (int (get text index)) 63)
+        length     (count text)
+        results    (loop [res (decompress-number text (inc index))
+                          last-num last-num
+                          result []]
+                     (if (>= (ffirst res) length)
+                       (conj result (+ last-num (second (first res))))
+                       (recur (decompress-number text (ffirst res))
+                              (+ last-num (second (first res)))
+                              (conj result (+ last-num (second (first res)))))))]
     (mapv (fn [item]
             (if (> precision 0)
               (with-precision precision
                 (*' item (Math/pow 10 (- precision))))
               (*' item (int (Math/pow 10 (- precision))))))
           results)))
+
+
+(spec/fdef decompress
+           :args (spec/cat :text ::text)
+           :ret ::series)
