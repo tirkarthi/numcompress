@@ -1,4 +1,4 @@
-# numcompress [![Build Status](https://travis-ci.org/tirkarthi/numcompress.svg?branch=master)](https://travis-ci.org/tirkarthi/numcompress)
+# numcompress [![Build Status](https://travis-ci.org/tirkarthi/numcompress.svg?branch=master)](https://travis-ci.org/tirkarthi/numcompress) [![Clojars Project](https://img.shields.io/clojars/v/xtreak/numcompress.svg)](https://clojars.org/xtreak/numcompress)
 
 A clojure port of [numcompress](https://github.com/amit1rrr/numcompress) Python library
 
@@ -11,7 +11,7 @@ Compression algorithm is based on [google encoded polyline format](https://devel
 
 ## Leiningen
 
-[xtreak/numcompress "0.1.0"]
+`[xtreak/numcompress "0.1.0"]`
 
 ## Usage
 
