@@ -5,4 +5,4 @@
             :url "https://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.9.0"]]
   :plugins [[lein-codox "0.10.3"]]
-  :codox {:output-path "codox"})
+  :codox {:output-path "docs"})
